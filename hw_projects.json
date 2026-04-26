@@ -1,0 +1,68 @@
+[
+  {
+    "id": "HW-2026-001",
+    "title": "Toshkent viloyati, Yangiyo'l tumani 5-sonli maktabni rekonstruksiya qilish",
+    "description": "Maktab binosini to'liq ta'mirlash, yangi isitish tizimini o'rnatish va sport maydonchasini qurish.",
+    "category": "education",
+    "region": "Toshkent viloyati",
+    "district": "Yangiyo'l tumani",
+    "budget_amount": 5000000000,
+    "budget_spent": 3500000000,
+    "contractor": "Qurilish Invest MChJ",
+    "start_date": "2025-10-01",
+    "end_date": "2026-05-01",
+    "actual_end_date": null,
+    "lat": 41.1118,
+    "lng": 69.0436,
+    "address": "Yangiyo'l tumani, Navoiy ko'chasi 15-uy",
+    "status": "ongoing",
+    "before_photos": [
+      "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=800"
+    ],
+    "created_at": "2025-09-15T10:00:00Z"
+  },
+  {
+    "id": "HW-2026-002",
+    "title": "Samarqand shahri, Amir Temur ko'chasini asfaltlash",
+    "description": "4 kilometr uzunlikdagi asosiy yo'lni kapital ta'mirlash va yoritish tizimlarini yangilash.",
+    "category": "traffic",
+    "region": "Samarqand viloyati",
+    "district": "Samarqand shahri",
+    "budget_amount": 12000000000,
+    "budget_spent": 12000000000,
+    "contractor": "Samarqand Yo'llar Direksiyasi",
+    "start_date": "2026-01-10",
+    "end_date": "2026-04-10",
+    "actual_end_date": "2026-04-15",
+    "lat": 39.6542,
+    "lng": 66.9597,
+    "address": "Samarqand shahri, Amir Temur ko'chasi",
+    "status": "completed",
+    "before_photos": [
+      "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800"
+    ],
+    "created_at": "2025-12-20T14:30:00Z"
+  },
+  {
+    "id": "HW-2026-003",
+    "title": "Buxoro viloyati, G'ijduvon tumani markaziy shifoxonasini ta'mirlash",
+    "description": "Markaziy shifoxona 1-bino tomi va isitish tizimi.",
+    "category": "health",
+    "region": "Buxoro viloyati",
+    "district": "G'ijduvon tumani",
+    "budget_amount": 3200000000,
+    "budget_spent": 1500000000,
+    "contractor": "Buxoro Qurilish Maxsus MChJ",
+    "start_date": "2026-02-01",
+    "end_date": "2026-08-01",
+    "actual_end_date": null,
+    "lat": 40.1031,
+    "lng": 64.6775,
+    "address": "G'ijduvon tumani, Ibn Sino ko'chasi",
+    "status": "ongoing",
+    "before_photos": [
+      "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800"
+    ],
+    "created_at": "2026-04-25T12:32:52.736Z"
+  }
+]

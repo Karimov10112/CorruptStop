@@ -39,6 +39,24 @@ export function Header() {
           >
             {t('nav_stats')}
           </Link>
+          <div className="relative group">
+            <button className={`text-sm hover:text-primary transition-colors flex items-center gap-1 ${location.pathname.startsWith('/hokimwatch') ? 'text-primary font-medium' : 'text-foreground'}`}>
+              <Shield className="w-3.5 h-3.5 text-trust-teal" />
+              HokimWatch
+              <span className="text-[10px] ml-0.5">▾</span>
+            </button>
+            <div className="absolute left-0 top-full mt-2 w-52 bg-card border border-border rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+              <Link to="/hokimwatch" className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-muted transition-colors border-b border-border">
+                🏗 Loyihalar Nazorati
+              </Link>
+              <Link to="/hokimwatch/land" className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-muted transition-colors text-emerald-600 font-medium">
+                🌱 LandWatch <span className="ml-auto text-[9px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded font-black">YANGI</span>
+              </Link>
+              <Link to="/hokimwatch/stats" className="flex items-center gap-2 px-4 py-3 text-sm hover:bg-muted transition-colors border-t border-border">
+                📊 Statistika
+              </Link>
+            </div>
+          </div>
           <a
             href="#api"
             className="text-sm text-foreground hover:text-primary transition-colors"
@@ -95,7 +113,7 @@ export function Header() {
                 <div className="w-6 h-6 bg-white/20 rounded-md flex items-center justify-center">
                   <Shield className="w-3.5 h-3.5" />
                 </div>
-                <span>{user?.name.split(' ')[0]} ({user?.points} ball)</span>
+                <span>{user?.name.split(' ')[0]}</span>
               </button>
               <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
                 <div className="p-3 border-b border-border bg-muted/30">

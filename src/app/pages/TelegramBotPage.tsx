@@ -86,7 +86,7 @@ export function TelegramBotPage() {
           description: 'Telegram bot orqali yuborilgan shikoyat.',
         });
 
-        botMsg.text = '🎉 Shikoyatingiz qabul qilindi!\n\nID: CS-2026-' + Math.floor(10000 + Math.random() * 90000) + '\n\nSizga +10 ball berildi! ⭐️';
+        botMsg.text = '🎉 Shikoyatingiz qabul qilindi!\n\nID: CS-2026-' + Math.floor(10000 + Math.random() * 90000);
         botMsg.buttons = [['🗺 Xaritada ko\'rish', '📝 Yangi shikoyat']];
         setStep(0);
       } else {

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "L-001",
+    "lat": 41.3415,
+    "lng": 69.2315,
+    "title": "Yunusobod 15-kvartal bog' hududi",
+    "status": "critical",
+    "description": "Ushbu hududda bolalar maydonchasi bo'lishi kerak edi, biroq kottej qurilishi boshlangan.",
+    "risk_score": 95,
+    "legal_status": "Noqonuniy sotilgan",
+    "votes": 13
+  },
+  {
+    "id": "L-002",
+    "lat": 41.3115,
+    "lng": 69.2815,
+    "title": "Mirobod tumanidagi ariq bo'yi",
+    "status": "warning",
+    "description": "Suv ob'ektlari himoya hududida do'kon qurish uchun noqonuniy ruxsat berilgan.",
+    "risk_score": 75,
+    "legal_status": "Tekshirilmoqda",
+    "votes": 9
+  },
+  {
+    "id": "L-003",
+    "lat": 39.6542,
+    "lng": 66.9597,
+    "title": "Samarqand - tarixiy hudud chegarasi",
+    "status": "critical",
+    "description": "YuNESKO himoyasidagi hududga yaqin yerda ko'p qavatli bino qurish harakati.",
+    "risk_score": 88,
+    "legal_status": "To'xtatilgan",
+    "votes": 23
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "index": 0,
+    "timestamp": "2026-04-25T12:32:52.732Z",
+    "data": "Genesis Block - HokimWatch Initialized",
+    "previousHash": "0",
+    "hash": "b6ff2b8dbf599c9bab4fe055b74257e936093be858e45428e13ea028e874c831"
+  },
+  {
+    "index": 1,
+    "timestamp": "2026-04-25T12:32:52.741Z",
+    "data": {
+      "action": "STATE_API_SYNC",
+      "project_id": "HW-2026-003",
+      "details": "Loyiha Davlat API orqali avtomatik qo'shildi."
+    },
+    "previousHash": "b6ff2b8dbf599c9bab4fe055b74257e936093be858e45428e13ea028e874c831",
+    "hash": "e5adb29e6beb8ca64cc5852c7499d88e1045a0c573aa336e66358001a70a3acc"
+  }
+]

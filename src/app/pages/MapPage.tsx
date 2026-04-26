@@ -40,22 +40,24 @@ const customIcon = new Icon({
 });
 
 const normalizeSector = (report: any) => {
-  if (report.sector) return report.sector;
-  const cat = report.category || "";
-  if (cat.includes("Sog'liqni")) return 'health';
-  if (cat.includes("Ta'lim")) return 'education';
-  if (cat.includes("Qurilish")) return 'construction';
-  if (cat.includes("xarid")) return 'procurement';
-  if (cat.includes("Yo'l")) return 'traffic';
-  if (cat.includes("Yer")) return 'property';
-  if (cat.includes("Sud") || cat.includes("Adliya")) return 'justice';
-  if (cat.includes("Soliq")) return 'tax';
-  if (cat.includes("Sport")) return 'sport';
-  if (cat.includes("Kommunal")) return 'utilities';
-  if (cat.includes("yordam")) return 'social';
-  if (cat.includes("Mehnat")) return 'labor';
-  if (cat.includes("Harbiy")) return 'military';
-  return 'other';
+  const rawSector = report.sector || report.category || "";
+  const s = rawSector.toLowerCase();
+  
+  if (s === 'health' || s.includes("sog'liq")) return 'health';
+  if (s === 'education' || s.includes("ta'lim")) return 'education';
+  if (s === 'construction' || s.includes("qurilish")) return 'construction';
+  if (s === 'procurement' || s.includes("xarid")) return 'procurement';
+  if (s === 'traffic' || s.includes("yo'l") || s.includes("yol") || s.includes("transport")) return 'traffic';
+  if (s === 'property' || s.includes("yer") || s.includes("mulk")) return 'property';
+  if (s === 'justice' || s.includes("sud") || s.includes("adliya") || s.includes("pora") || s.includes("korrupsiya")) return 'justice';
+  if (s === 'tax' || s.includes("soliq")) return 'tax';
+  if (s === 'sport' || s.includes("sport")) return 'sport';
+  if (s === 'utilities' || s.includes("kommunal")) return 'utilities';
+  if (s === 'social' || s.includes("yordam")) return 'social';
+  if (s === 'labor' || s.includes("mehnat")) return 'labor';
+  if (s === 'military' || s.includes("harbiy")) return 'military';
+  
+  return 'justice'; // Default to justice if no match found
 };
 
 export function MapPage() {
@@ -125,7 +127,7 @@ export function MapPage() {
             <div>
               <h3 className="text-sm font-medium mb-3">Soha</h3>
               <div className="space-y-2">
-                {['health', 'education', 'construction', 'procurement', 'traffic', 'property', 'justice', 'tax', 'sport', 'utilities', 'social', 'labor', 'military', 'other'].map((sector) => (
+                {['health', 'education', 'construction', 'procurement', 'traffic', 'property', 'justice', 'tax', 'sport', 'utilities', 'social', 'labor', 'military'].map((sector) => (
                   <label key={sector} className="flex items-center gap-2 cursor-pointer py-1">
                     <input
                       type="checkbox"
@@ -204,10 +206,22 @@ export function MapPage() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
 
-            {filteredReports.map((report) => {
-              const lat = report.lat || (report.location && report.location.lat);
-              const lng = report.lng || (report.location && report.location.lng);
+            {filteredReports.map((report, idx) => {
+              const baseLat = report.lat || (report.location && report.location.lat);
+              const baseLng = report.lng || (report.location && report.location.lng);
               const sector = normalizeSector(report);
+              
+              // Bir xil joyda turgan markerlarni bir-biridan biroz surish (Jitter)
+              const sameLocationReports = filteredReports.filter(r => (r.lat || r.location?.lat) === baseLat && (r.lng || r.location?.lng) === baseLng);
+              let lat = baseLat;
+              let lng = baseLng;
+              
+              if (sameLocationReports.length > 1) {
+                const offset = 0.0001; // Taxminan 10-15 metr
+                const angle = (idx / sameLocationReports.length) * 2 * Math.PI;
+                lat += Math.cos(angle) * offset;
+                lng += Math.sin(angle) * offset;
+              }
 
               return (
                 <Marker
@@ -273,9 +287,9 @@ export function MapPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <span
                         className="px-3 py-1 rounded-lg text-sm text-white"
-                        style={{ backgroundColor: sectorColors[selectedReport.sector || selectedReport.category || 'other'] || sectorColors.other }}
+                        style={{ backgroundColor: sectorColors[normalizeSector(selectedReport)] || sectorColors.other }}
                       >
-                        {t(`sector_${selectedReport.sector || selectedReport.category || 'other'}`)}
+                        {t(`sector_${normalizeSector(selectedReport)}`)}
                       </span>
                     </div>
                     <div className="space-y-3">

@@ -1,6 +1,6 @@
 import { Header } from '../components/Header';
 import { useLanguage } from '../contexts/LanguageContext';
-import { TrendingUp, TrendingDown, BarChart3, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, Calendar, Shield, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Mock data
@@ -56,66 +56,53 @@ export function StatsPage() {
           <div className="bg-card border border-border rounded-2xl p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Jami shikoyatlar</p>
+                <p className="text-sm text-muted-foreground mb-1">Jami Shikoyatlar</p>
                 <h3 className="text-4xl" style={{ fontFamily: 'var(--font-serif)' }}>2,847</h3>
               </div>
               <div className="p-2 bg-primary/10 rounded-lg">
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <TrendingUp className="w-4 h-4 text-trust-teal" />
-              <span className="text-trust-teal">+12%</span>
-              <span className="text-muted-foreground">bu oy</span>
+            <p className="text-xs text-trust-teal">+12% o'tgan oydan</p>
+          </div>
+
+          <div className="bg-slate-900 text-white border border-slate-700 rounded-2xl p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <p className="text-sm text-slate-400 mb-1">HokimWatch Loyihalar</p>
+                <h3 className="text-4xl text-emerald-400" style={{ fontFamily: 'var(--font-serif)' }}>12 ta</h3>
+              </div>
+              <div className="p-2 bg-emerald-500/20 rounded-lg">
+                <Shield className="w-5 h-5 text-emerald-400" />
+              </div>
             </div>
-            <div className="mt-4 h-12">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={monthlyData.slice(-7)}>
-                  <Line type="monotone" dataKey="total" stroke="#D85A30" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <p className="text-xs text-slate-500 font-mono">XAVFSIZLIK: BLOCKCHAIN FAOL</p>
           </div>
 
           <div className="bg-card border border-border rounded-2xl p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Bu hafta</p>
-                <h3 className="text-4xl" style={{ fontFamily: 'var(--font-serif)' }}>143</h3>
+                <p className="text-sm text-emerald-600 font-bold mb-1">LandWatch Qoidabuzarliklar</p>
+                <h3 className="text-3xl text-emerald-700" style={{ fontFamily: 'var(--font-serif)' }}>42 ta</h3>
               </div>
-              <div className="p-2 bg-trust-teal/10 rounded-lg">
-                <Calendar className="w-5 h-5 text-trust-teal" />
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <Shield className="w-5 h-5 text-emerald-600" />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <TrendingUp className="w-4 h-4 text-trust-teal" />
-              <span className="text-trust-teal">+34%</span>
-              <span className="text-muted-foreground">o'tgan haftaga nisbatan</span>
-            </div>
+            <p className="text-xs text-muted-foreground">Jamoatchilik tomonidan tasdiqlangan</p>
           </div>
 
-          <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Tasdiqlangan</p>
-                <h3 className="text-4xl" style={{ fontFamily: 'var(--font-serif)' }}>89%</h3>
+                <p className="text-sm text-red-600 mb-1">Eskalatsiyalar</p>
+                <h3 className="text-4xl text-red-700" style={{ fontFamily: 'var(--font-serif)' }}>3 ta</h3>
               </div>
-              <div className="p-2 bg-warning-amber/10 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-warning-amber" />
+              <div className="p-2 bg-red-100 rounded-lg">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
             </div>
-            <p className="text-sm text-muted-foreground">Sifat ko'rsatkichi</p>
-          </div>
-
-          <div className="bg-card border border-border rounded-2xl p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Eng ko'p soha</p>
-                <h3 className="text-2xl" style={{ fontFamily: 'var(--font-serif)' }}>Ta'lim</h3>
-              </div>
-              <div className="text-3xl">🏥</div>
-            </div>
-            <p className="text-sm text-muted-foreground">437 shikoyat</p>
+            <p className="text-xs text-red-500 font-bold">PROKURATURAGA YUBORILDI</p>
           </div>
         </div>
 

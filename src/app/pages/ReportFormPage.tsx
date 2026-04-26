@@ -4,7 +4,7 @@ import { Header } from '../components/Header';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useReports } from '../contexts/ReportContext';
-import { Shield, MapPin, ChevronRight, ChevronLeft, CheckCircle, Upload, X, Search } from 'lucide-react';
+import { Shield, MapPin, ChevronRight, ChevronLeft, CheckCircle, Upload, X, Search, AlertTriangle } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import { Icon } from 'leaflet';
 
@@ -56,13 +56,18 @@ export function ReportFormPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     sector: '',
+    organization: '',
     locationType: '',
     city: '',
     address: '',
     description: '',
     amount: '',
     file: null as File | null,
+    imagePreview: undefined as string | undefined,
+    lat: 41.2995,
+    lng: 69.2401
   });
+  const [aiResult, setAiResult] = useState<any>(null);
   const [charCount, setCharCount] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [reportId, setReportId] = useState('');
@@ -98,16 +103,33 @@ export function ReportFormPage() {
             <h1 className="text-3xl mb-4" style={{ fontFamily: 'var(--font-serif)' }}>
               🎉 Shikoyatingiz qabul qilindi!
             </h1>
-            <div className="bg-muted rounded-lg p-4 mb-6 inline-block">
-              <p className="text-sm text-muted-foreground mb-1">ID:</p>
-              <p className="text-2xl font-mono">{reportId}</p>
-              <button className="text-sm text-primary hover:underline mt-2">📋 Nusxa olish</button>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-6 text-left">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="px-2 py-1 bg-primary text-white text-[10px] font-bold rounded">AI ANALYSIS</div>
+                <div className="h-px flex-1 bg-slate-200"></div>
+              </div>
+              <p className="text-sm text-slate-600 mb-4 italic">"{aiResult?.analysis}"</p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-white rounded-xl border border-slate-100">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Aniqlangan soha</p>
+                  <p className="text-sm font-bold text-slate-700 capitalize">{aiResult?.category || 'Aniqlanmadi'}</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-slate-100">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Mas'ul tashkilot</p>
+                  <p className="text-sm font-bold text-slate-700">{aiResult?.organization || 'Ko\'rib chiqilmoqda'}</p>
+                </div>
+              </div>
+
+              {aiResult?.legal_basis && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-blue-600" />
+                  <p className="text-[10px] text-blue-800 font-bold uppercase">Huquqiy asos: {aiResult.legal_basis}</p>
+                </div>
+              )}
             </div>
-            <div className="bg-warning-light dark:bg-warning-amber/10 rounded-lg p-4 mb-6">
-              <p className="text-sm">
-                ⭐ Ball: <span className="font-medium">+10</span> (Jami: {(user?.points || 0) + 10} ball)
-              </p>
-            </div>
+
+
             <div className="flex flex-wrap gap-4 justify-center">
               <button
                 onClick={() => navigate('/map')}
@@ -140,33 +162,81 @@ export function ReportFormPage() {
     );
   }
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+  const handleNext = async () => {
+    if (step === 1 && formData.description.length >= 10) {
+      setStep(2);
+    } else if (step === 2) {
+      // Step 2 dan 3 ga o'tayotganda AI tahlilini boshlaymiz
+      setStep(3);
+      setLoading(true);
+      try {
+        const apiUrl = `http://${window.location.hostname}:3001/api/ai-precheck`;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: formData.description })
+        });
+        
+        if (!response.ok) throw new Error('Server hatosi');
+        
+        const result = await response.json();
+        setAiResult(result);
+      } catch (error) {
+        console.error('AI Precheck Error:', error);
+        alert('Tizim bilan bog\'lanishda xatolik. Iltimos, server ishlayotganini tekshiring.');
+        setStep(2); // Qaytaramiz
+      } finally {
+        setLoading(false);
+      }
+    } else if (step === 3) {
+      setStep(4);
+    }
   };
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    addReport({
-      lat: (formData as any).lat || 41.2995, // Haqiqiy lat
-      lng: (formData as any).lng || 69.2401, // Haqiqiy lng
-      sector: formData.sector,
-      location: 'GPS Hudud (Aniq)',
-      description: formData.description,
-      image: (formData as any).imagePreview,
-    });
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const apiUrl = `http://${window.location.hostname}:3001/api/reports`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          description: formData.description,
+          lat: formData.lat,
+          lng: formData.lng,
+          image: formData.imagePreview,
+          category: aiResult?.category,
+          organization: aiResult?.organization
+        })
+      });
 
-    const id = `CS-2026-${String(Math.floor(Math.random() * 90000) + 10000)}`;
-    setReportId(id);
-    setSubmitted(true);
+      const result = await response.json();
+      
+      if (response.ok) {
+        setReportId(result.id);
+        if (result.ai_analysis) {
+          setAiResult(result.ai_analysis);
+        }
+        setSubmitted(true);
+      } else {
+        alert(result.message || 'Xatolik yuz berdi');
+      }
+    } catch (error) {
+      alert('Server bilan aloqa uzildi');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canProceed = () => {
-    if (step === 1) return formData.sector !== '';
+    if (loading) return false; // AI tahlil qilayotganda bosib bo'lmaydi
+    if (step === 1) return formData.description.length >= 10;
     if (step === 2) return formData.locationType === 'gps';
-    if (step === 3) return formData.description.length >= 3;
+    if (step === 3) return aiResult && aiResult.status !== 'invalid';
     return true;
   };
 
@@ -215,28 +285,89 @@ export function ReportFormPage() {
 
         {/* Form Card */}
         <div className="bg-card border border-border rounded-2xl p-8">
-          {/* Step 1: Sector */}
+          {/* Step 1: Description */}
           {step === 1 && (
             <div>
               <h2 className="text-2xl mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-                Qaysi sohada muammo kuzatdingiz?
+                Nima bo'lganini batafsil yozing
               </h2>
-              <p className="text-sm text-muted-foreground mb-6">Tegishli sohani tanlang</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {sectors.map((sector) => (
-                  <button
-                    key={sector.id}
-                    onClick={() => setFormData({ ...formData, sector: sector.id })}
-                    className={`p-4 border-2 rounded-xl text-center transition-all hover:scale-105 ${
-                      formData.sector === sector.id
-                        ? 'border-primary bg-coral-light dark:bg-coral-action/10'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="text-3xl mb-2">{sector.emoji}</div>
-                    <div className="text-xs">{t(sector.key)}</div>
-                  </button>
-                ))}
+              <p className="text-sm text-muted-foreground mb-6">
+                AI tizimi matnni tahlil qilib, tegishli sohani o'zi aniqlaydi. 
+                Shuningdek, <a href="https://t.me/corruptstop_bot" target="_blank" className="text-primary font-bold hover:underline">Telegram botimiz</a> orqali ham yuborishingiz mumkin.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => {
+                      const val = e.target.value.slice(0, 500);
+                      setFormData({ ...formData, description: val });
+                      setCharCount(val.length);
+                    }}
+                    placeholder="Masalan: Maktabimizda o'quvchilardan noqonuniy ravishda pul yig'ish holatlari kuzatilmoqda..."
+                    rows={6}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl resize-none focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  />
+                  <div className="text-right text-xs text-muted-foreground mt-2 font-mono">
+                    {charCount}/500
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-3">
+                    📎 Rasm yoki hujjat (ixtiyoriy)
+                  </label>
+                  
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setFormData({ ...formData, file });
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setFormData(prev => ({ ...prev, imagePreview: reader.result as string }));
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+
+                  {!formData.file ? (
+                    <label 
+                      htmlFor="file-upload"
+                      className="border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center hover:border-primary transition-all cursor-pointer block bg-slate-50/50"
+                    >
+                      <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                      <p className="text-sm font-bold text-slate-600">
+                        Faylni tanlang yoki yuklang
+                      </p>
+                      <p className="text-xs text-slate-400 mt-2">
+                        EXIF ma'lumotlari (joylashuv, vaqt) avtomatik tekshiriladi
+                      </p>
+                    </label>
+                  ) : (
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 flex justify-center group">
+                      {formData.imagePreview && (
+                        <img 
+                          src={formData.imagePreview} 
+                          alt="Preview" 
+                          className="max-w-full max-h-[300px] object-contain transition-transform group-hover:scale-105"
+                        />
+                      )}
+                      <button 
+                        onClick={() => setFormData({ ...formData, file: null, imagePreview: undefined })}
+                        className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-full shadow-xl hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -313,140 +444,92 @@ export function ReportFormPage() {
             </div>
           )}
 
-          {/* Step 3: Description */}
+          {/* Step 3: AI Smart Tahlili */}
           {step === 3 && (
-            <div>
-              <h2 className="text-2xl mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-                Nima bo'lganini qisqacha yozing
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6">(500 belgigacha)</p>
-
-              <div className="space-y-4">
-                <div>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => {
-                      const val = e.target.value.slice(0, 500);
-                      setFormData({ ...formData, description: val });
-                      setCharCount(val.length);
-                    }}
-                    placeholder="Hodisa haqida batafsil ma'lumot bering..."
-                    rows={6}
-                    className="w-full px-4 py-3 bg-input-background border border-border rounded-lg resize-none"
-                  />
-                  <div className="text-right text-sm text-muted-foreground mt-1">
-                    {charCount}/500
+            <div className="text-center py-4">
+              <div className={`w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 ${loading ? 'animate-spin-slow' : ''}`}>
+                <Shield className={`w-10 h-10 ${loading ? 'text-primary' : aiResult?.status === 'invalid' ? 'text-red-500' : 'text-emerald-500'}`} />
+              </div>
+              <h2 className="text-2xl font-black text-slate-900 mb-2">AI Smart Tahlili</h2>
+              
+              {loading ? (
+                <p className="text-slate-500 mb-8 animate-pulse">Sun'iy intellekt matnni tahlil qilib, tegishli tashkilotni aniqlamoqda...</p>
+              ) : aiResult?.status === 'invalid' ? (
+                <div className="space-y-4">
+                   <div className="p-6 bg-red-50 border border-red-100 rounded-3xl text-left">
+                      <div className="flex items-center gap-2 text-red-600 font-bold mb-2">
+                        <AlertTriangle className="w-5 h-5" />
+                        AI RAD ETDI
+                      </div>
+                      <p className="text-sm text-red-700 leading-relaxed">{aiResult.analysis}</p>
+                   </div>
+                   <button onClick={() => setStep(1)} className="text-primary font-bold hover:underline">
+                      ✍️ Shikoyat matnini tahrirlash
+                   </button>
+                </div>
+              ) : (
+                <div className="space-y-4 max-w-sm mx-auto">
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-100">
+                    <CheckCircle className="w-5 h-5" />
+                    <div className="text-left">
+                      <p className="text-[10px] uppercase font-black opacity-60">Soha aniqlandi</p>
+                      <p className="text-sm font-bold capitalize">{aiResult?.category || 'Umumiy'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-100">
+                    <CheckCircle className="w-5 h-5" />
+                    <div className="text-left">
+                      <p className="text-[10px] uppercase font-black opacity-60">Mas'ul organ</p>
+                      <p className="text-sm font-bold">{aiResult?.organization}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-100">
+                    <CheckCircle className="w-5 h-5" />
+                    <div className="text-left">
+                      <p className="text-[10px] uppercase font-black opacity-60">Status</p>
+                      <p className="text-sm font-bold">SHIKOYAT O'RINLI</p>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    📎 Rasm yoki hujjat (ixtiyoriy)
-                  </label>
-                  
-                  <input
-                    type="file"
-                    id="file-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setFormData({ ...formData, file });
-                        // Rasm preview uchun base64 ga o'tkazamiz
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setFormData(prev => ({ ...prev, imagePreview: reader.result as string }));
-                        };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-
-                  {!formData.file ? (
-                    <label 
-                      htmlFor="file-upload"
-                      className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer block"
-                    >
-                      <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        Faylni yuklang yoki shu yerga torting
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        EXIF ma'lumotlari avtomatik tozalanadi
-                      </p>
-                    </label>
-                  ) : (
-                    <div className="relative rounded-lg overflow-hidden border border-border bg-muted flex justify-center">
-                      {(formData as any).imagePreview && (
-                        <img 
-                          src={(formData as any).imagePreview} 
-                          alt="Preview" 
-                          className="max-w-full max-h-[400px] object-contain"
-                        />
-                      )}
-                      <button 
-                        onClick={() => setFormData({ ...formData, file: null, imagePreview: undefined } as any)}
-                        className="absolute top-2 right-2 p-1.5 bg-danger-red text-white rounded-full shadow-lg hover:scale-110 transition-transform"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                      <div className="p-3 text-xs truncate">
-                        {formData.file.name}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
           )}
 
-          {/* Step 4: Confirmation */}
+          {/* Step 4: Final Confirmation */}
           {step === 4 && (
             <div>
               <h2 className="text-2xl mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
-                ✅ Shikoyatingizni tekshirib ko'ring
+                🚀 Yuborishga tayyormisiz?
               </h2>
-              <p className="text-sm text-muted-foreground mb-6">Barcha ma'lumotlar to'g'rimi?</p>
+              <p className="text-sm text-muted-foreground mb-6">Yuborish tugmasini bosganingizdan so'ng, AI yakuniy tahlilni amalga oshiradi.</p>
 
-              <div className="space-y-4 bg-muted/50 rounded-lg p-6">
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">{sectors.find(s => s.id === formData.sector)?.emoji}</span>
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">Soha:</p>
-                    <p className="font-medium">{t(sectors.find(s => s.id === formData.sector)?.key || '')}</p>
+              <div className="space-y-4 bg-slate-50 rounded-2xl p-6 border border-slate-200">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-2xl">
+                    📝
                   </div>
-                  <button onClick={() => setStep(1)} className="text-xs text-primary hover:underline flex items-center gap-1">
-                    ✍️ Tahrirlash
-                  </button>
+                  <div className="flex-1">
+                    <p className="text-xs text-slate-400 font-bold uppercase mb-1">Shikoyat mazmuni</p>
+                    <p className="text-sm text-slate-700 line-clamp-3">{formData.description}</p>
+                  </div>
                 </div>
 
-                <div className="border-t border-border pt-4 flex items-start gap-3">
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-1">Joylashuv:</p>
-                    <p className="font-medium">
-                      {formData.locationType === 'gps' ? '📍 GPS joylashuv (500m radius)' : `${formData.city}, ${formData.address}`}
-                    </p>
+                <div className="border-t border-slate-200 pt-4 flex items-start gap-4">
+                  <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-2xl">
+                    📍
                   </div>
-                  <button onClick={() => setStep(2)} className="text-xs text-primary hover:underline flex items-center gap-1">
-                    ✍️ Tahrirlash
-                  </button>
+                  <div className="flex-1">
+                    <p className="text-xs text-slate-400 font-bold uppercase mb-1">Joylashuv</p>
+                    <p className="text-sm text-slate-700">GPS koordinatalari muhrlangan</p>
+                  </div>
                 </div>
 
-                <div className="border-t border-border pt-4 flex items-start gap-3">
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-1">Tavsif:</p>
-                    <p className="text-sm">{formData.description}</p>
+                <div className="bg-slate-900 p-4 rounded-xl text-white">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Shield className="w-4 h-4 text-emerald-400" />
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Xavfsizlik protokoli</span>
                   </div>
-                  <button onClick={() => setStep(3)} className="text-xs text-primary hover:underline flex items-center gap-1">
-                    ✍️ Tahrirlash
-                  </button>
-                </div>
-
-                <div className="border-t border-border pt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Sana: 24 Aprel 2026, {new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                  <p className="text-[10px] text-slate-400">Sizning shaxsingiz 100% anonim qoladi. Ma'lumotlar shifrlangan.</p>
                 </div>
               </div>
             </div>
@@ -481,12 +564,21 @@ export function ReportFormPage() {
                 className="px-6 py-4 bg-[#1D9E75] text-white rounded-xl hover:bg-[#168a65] transition-all flex items-center justify-center gap-2 font-bold shadow-lg shadow-trust-teal/20 animate-pulse-subtle"
               >
                 <CheckCircle className="w-5 h-5" />
-                Yuborish
+                {loading ? 'Yuborilmoqda...' : 'Yuborish'}
               </button>
             )}
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }

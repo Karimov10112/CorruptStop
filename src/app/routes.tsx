@@ -9,6 +9,14 @@ import { AdminPage } from './pages/AdminPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
+// HokimWatch
+import { HokimWatchMap } from './pages/HokimWatch/HokimWatchMap';
+import { ProjectDetail } from './pages/HokimWatch/ProjectDetail';
+import { ReportForm } from './pages/HokimWatch/ReportForm';
+import { HokimWatchStats } from './pages/HokimWatch/Stats';
+import { AuditExplorer } from './pages/HokimWatch/AuditExplorer';
+import { LandWatch } from './pages/HokimWatch/LandWatch';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -21,6 +29,15 @@ export const router = createBrowserRouter([
       { path: 'telegram', Component: TelegramBotPage },
       { path: 'admin', Component: AdminPage },
       { path: 'login', Component: LoginPage },
+      
+      // HokimWatch Routes
+      { path: 'hokimwatch', Component: HokimWatchMap },
+      { path: 'hokimwatch/stats', Component: HokimWatchStats },
+      { path: 'hokimwatch/explorer', Component: AuditExplorer },
+      { path: 'hokimwatch/land', Component: LandWatch },
+      { path: 'hokimwatch/:id', Component: ProjectDetail },
+      { path: 'hokimwatch/:id/report', Component: ReportForm },
+      
       { path: '*', Component: NotFoundPage },
     ],
   },

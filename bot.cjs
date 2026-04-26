@@ -8,6 +8,7 @@ console.log('🔐 CorruptStop SMS Bot ishga tushdi...');
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
+  console.log(`📩 Xabar keldi [${chatId}]: ${text}`);
   if (!text) return;
 
   // 1. Tasdiqlash kodi deep linki orqali kelsa
